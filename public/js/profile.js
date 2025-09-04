@@ -1,4 +1,4 @@
-// Football Team Manager - Profile Page JavaScript
+// FootyCount - Profile Page JavaScript
 class ProfileApp {
     constructor() {
         this.currentUser = null;
@@ -91,7 +91,9 @@ class ProfileApp {
 
     async checkAuthStatus() {
         try {
-            const response = await fetch('/api/auth/me');
+            const response = await fetch('/api/auth/me', {
+                credentials: 'include'
+            });
             if (response.ok) {
                 const data = await response.json();
                 this.currentUser = data.player;
@@ -162,7 +164,9 @@ class ProfileApp {
 
     async loadPlayerStats() {
         try {
-            const response = await fetch('/api/players/stats');
+            const response = await fetch('/api/players/stats', {
+                credentials: 'include'
+            });
             if (response.ok) {
                 const stats = await response.json();
                 
@@ -178,7 +182,9 @@ class ProfileApp {
 
     async loadRecentActivity() {
         try {
-            const response = await fetch('/api/players/activity');
+            const response = await fetch('/api/players/activity', {
+                credentials: 'include'
+            });
             if (response.ok) {
                 const activities = await response.json();
                 this.renderRecentActivity(activities);
@@ -245,9 +251,22 @@ class ProfileApp {
         document.getElementById('view-position').textContent = this.getPositionName(user.position);
         document.getElementById('view-jersey').textContent = user.jersey_number || 'Not assigned';
         
-        // Format join date
-        const joinDate = new Date(user.created_at);
-        document.getElementById('view-joined').textContent = joinDate.toLocaleDateString();
+        // Format join date - handle SQLite datetime format
+        let joinDate;
+        if (user.created_at) {
+            // SQLite returns datetime as string, try to parse it
+            joinDate = new Date(user.created_at.replace(' ', 'T'));
+            if (isNaN(joinDate.getTime())) {
+                // If parsing fails, try without replacement
+                joinDate = new Date(user.created_at);
+            }
+        }
+        
+        if (joinDate && !isNaN(joinDate.getTime())) {
+            document.getElementById('view-joined').textContent = joinDate.toLocaleDateString();
+        } else {
+            document.getElementById('view-joined').textContent = 'Unknown';
+        }
     }
 
     toggleEditMode() {
@@ -295,19 +314,25 @@ class ProfileApp {
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData);
 
+        console.log('Frontend profile update data:', data);
+
         try {
             const response = await fetch('/api/players/profile', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify(data),
             });
 
             const result = await response.json();
+            console.log('Profile update response:', result);
 
             if (response.ok) {
+                console.log('Current user before update:', this.currentUser);
                 this.currentUser = { ...this.currentUser, ...result.player };
+                console.log('Current user after update:', this.currentUser);
                 this.updateProfileHeader();
                 this.updateProfileDetails();
                 this.showViewMode();

@@ -85,7 +85,7 @@ cron.schedule('* * * * *', () => {
 db.init();
 
 server.listen(PORT, () => {
-    console.log(`🚀 Football WebApp running on http://localhost:${PORT}`);
+    console.log(`🚀 FootyCount running on http://localhost:${PORT}`);
     console.log(`📱 Share this link with your team!`);
 });
 

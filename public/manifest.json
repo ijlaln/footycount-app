@@ -1,6 +1,6 @@
 {
-    "name": "Football Team Manager",
-    "short_name": "Football Manager",
+    "name": "FootyCount",
+    "short_name": "FootyCount",
     "description": "Manage your football team attendance and matches",
     "start_url": "/",
     "display": "standalone",

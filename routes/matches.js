@@ -32,7 +32,6 @@ router.get('/', verifyToken, async (req, res) => {
                 COUNT(ma.id) as total_responses,
                 COUNT(CASE WHEN ma.status = 'in' THEN 1 END) as players_in,
                 COUNT(CASE WHEN ma.status = 'out' THEN 1 END) as players_out,
-                COUNT(CASE WHEN ma.status = 'maybe' THEN 1 END) as players_maybe,
                 p.name as created_by_name
             FROM matches m
             LEFT JOIN match_attendance ma ON m.id = ma.match_id
@@ -57,7 +56,6 @@ router.get('/upcoming', verifyToken, async (req, res) => {
                 COUNT(ma.id) as total_responses,
                 COUNT(CASE WHEN ma.status = 'in' THEN 1 END) as players_in,
                 COUNT(CASE WHEN ma.status = 'out' THEN 1 END) as players_out,
-                COUNT(CASE WHEN ma.status = 'maybe' THEN 1 END) as players_maybe,
                 p.name as created_by_name,
                 ma_user.status as user_status
             FROM matches m
@@ -106,8 +104,7 @@ router.get('/:id', verifyToken, async (req, res) => {
             LEFT JOIN match_attendance ma ON p.id = ma.player_id AND ma.match_id = ?
             ORDER BY 
                 CASE WHEN ma.status = 'in' THEN 1
-                     WHEN ma.status = 'maybe' THEN 2
-                     ELSE 3 END,
+                     ELSE 2 END,
                 p.name
         `, [matchId]);
 
@@ -147,10 +144,10 @@ router.post('/:id/attendance', verifyToken, async (req, res) => {
     try {
         const matchId = req.params.id;
         const playerId = req.user.id;
-        const { status } = req.body; // 'in', 'out', or 'maybe'
+        const { status } = req.body; // 'in' or 'out'
 
-        if (!['in', 'out', 'maybe'].includes(status)) {
-            return res.status(400).json({ error: 'Invalid status' });
+        if (!['in', 'out'].includes(status)) {
+            return res.status(400).json({ error: 'Invalid status. Must be "in" or "out"' });
         }
 
         // Check if match exists
@@ -169,8 +166,7 @@ router.post('/:id/attendance', verifyToken, async (req, res) => {
         const attendanceCount = await db.get(`
             SELECT 
                 COUNT(CASE WHEN status = 'in' THEN 1 END) as players_in,
-                COUNT(CASE WHEN status = 'out' THEN 1 END) as players_out,
-                COUNT(CASE WHEN status = 'maybe' THEN 1 END) as players_maybe
+                COUNT(CASE WHEN status = 'out' THEN 1 END) as players_out
             FROM match_attendance
             WHERE match_id = ?
         `, [matchId]);
@@ -195,6 +191,48 @@ router.post('/:id/attendance', verifyToken, async (req, res) => {
 
     } catch (error) {
         console.error('Error marking attendance:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Get match attendance with player names
+router.get('/:id/players', verifyToken, async (req, res) => {
+    try {
+        const matchId = req.params.id;
+
+        const playersIn = await db.all(`
+            SELECT p.name, p.jersey_number
+            FROM players p
+            JOIN match_attendance ma ON p.id = ma.player_id
+            WHERE ma.match_id = ? AND ma.status = 'in'
+            ORDER BY p.name
+        `, [matchId]);
+
+        const playersOut = await db.all(`
+            SELECT p.name, p.jersey_number
+            FROM players p
+            JOIN match_attendance ma ON p.id = ma.player_id
+            WHERE ma.match_id = ? AND ma.status = 'out'
+            ORDER BY p.name
+        `, [matchId]);
+
+        // Also get players who haven't responded (default to 'out')
+        const playersNotResponded = await db.all(`
+            SELECT p.name, p.jersey_number
+            FROM players p
+            WHERE p.id NOT IN (
+                SELECT player_id FROM match_attendance WHERE match_id = ?
+            )
+            ORDER BY p.name
+        `, [matchId]);
+
+        res.json({
+            playersIn,
+            playersOut: [...playersOut, ...playersNotResponded]
+        });
+
+    } catch (error) {
+        console.error('Error fetching match players:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

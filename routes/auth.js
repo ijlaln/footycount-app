@@ -221,9 +221,13 @@ router.get('/me', async (req, res) => {
         }
 
         const decoded = jwt.verify(token, JWT_SECRET);
+        console.log('Auth /me - decoded token:', decoded);
+        
         const player = await db.get('SELECT * FROM players WHERE id = ?', [decoded.id]);
+        console.log('Auth /me - player found:', player);
 
         if (!player) {
+            console.log('Auth /me - No player found for ID:', decoded.id);
             return res.status(404).json({ error: 'Player not found' });
         }
 
@@ -234,7 +238,8 @@ router.get('/me', async (req, res) => {
                 name: player.name,
                 position: player.position,
                 jersey_number: player.jersey_number,
-                is_admin: player.is_admin
+                is_admin: player.is_admin,
+                created_at: player.created_at
             }
         });
 

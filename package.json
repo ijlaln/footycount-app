@@ -1,7 +1,7 @@
 {
-  "name": "football-webapp",
+  "name": "footycount",
   "version": "1.0.0",
-  "description": "Football team management web application for small groups",
+  "description": "FootyCount - Football team attendance tracking app for small groups",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

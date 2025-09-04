@@ -1,4 +1,4 @@
-// Football Team Manager - Main JavaScript
+// FootyCount - Main JavaScript
 class FootballApp {
     constructor() {
         this.currentUser = null;
@@ -205,6 +205,43 @@ class FootballApp {
         }
     }
 
+    async loadMatchPlayers(matchId) {
+        try {
+            const response = await fetch(`/api/matches/${matchId}/players`);
+            if (response.ok) {
+                const data = await response.json();
+                this.updateMatchPlayersDisplay(matchId, data);
+            }
+        } catch (error) {
+            console.error('Error loading match players:', error);
+        }
+    }
+
+    updateMatchPlayersDisplay(matchId, playersData) {
+        const playersContainer = document.getElementById(`players-${matchId}`);
+        if (!playersContainer) return;
+
+        const inPlayers = playersData.playersIn.map(p => 
+            p.jersey_number ? `${p.name} (#${p.jersey_number})` : p.name
+        );
+        const outPlayers = playersData.playersOut.map(p => 
+            p.jersey_number ? `${p.name} (#${p.jersey_number})` : p.name
+        );
+
+        playersContainer.innerHTML = `
+            <div class="players-section">
+                <div class="players-in">
+                    <h4>✅ In (${inPlayers.length})</h4>
+                    <div class="player-names">${inPlayers.length > 0 ? inPlayers.join(', ') : 'No one yet'}</div>
+                </div>
+                <div class="players-out">
+                    <h4>❌ Out (${outPlayers.length})</h4>
+                    <div class="player-names">${outPlayers.length > 0 ? outPlayers.join(', ') : 'No one yet'}</div>
+                </div>
+            </div>
+        `;
+    }
+
     async loadUserData() {
         await Promise.all([
             this.loadUserProfile(),
@@ -277,6 +314,11 @@ class FootballApp {
         }
 
         container.innerHTML = matches.map(match => this.createMatchCard(match, true)).join('');
+        
+        // Load player names for each match
+        matches.forEach(match => {
+            this.loadMatchPlayers(match.id);
+        });
     }
 
     displayRecentMatches(matches) {
@@ -294,6 +336,11 @@ class FootballApp {
         }
 
         container.innerHTML = recentMatches.map(match => this.createMatchCard(match, false)).join('');
+        
+        // Load player names for each match
+        recentMatches.forEach(match => {
+            this.loadMatchPlayers(match.id);
+        });
     }
 
     createMatchCard(match, isUpcoming) {
@@ -323,28 +370,24 @@ class FootballApp {
                         <div class="match-stat-value">${match.players_out || 0}</div>
                         <div class="match-stat-label">Out</div>
                     </div>
-                    <div class="match-stat">
-                        <div class="match-stat-value">${match.players_maybe || 0}</div>
-                        <div class="match-stat-label">Maybe</div>
-                    </div>
                 </div>
 
                 ${isUpcoming ? `
                     <div class="match-actions">
                         <button class="attendance-btn in ${userStatus === 'in' ? 'active' : ''}" 
                                 onclick="app.markAttendance(${match.id}, 'in')">
-                            ✓ I'm In
+                            ✓ In
                         </button>
                         <button class="attendance-btn out ${userStatus === 'out' ? 'active' : ''}" 
                                 onclick="app.markAttendance(${match.id}, 'out')">
-                            ✗ I'm Out
-                        </button>
-                        <button class="attendance-btn maybe ${userStatus === 'maybe' ? 'active' : ''}" 
-                                onclick="app.markAttendance(${match.id}, 'maybe')">
-                            ? Maybe
+                            ✗ Out
                         </button>
                     </div>
                 ` : ''}
+                
+                <div class="match-players" id="players-${match.id}">
+                    <!-- Player names will be loaded here -->
+                </div>
             </div>
         `;
     }
@@ -381,11 +424,12 @@ class FootballApp {
             if (matchId == data.matchId) {
                 const inStat = card.querySelector('.match-stat.in .match-stat-value');
                 const outStat = card.querySelector('.match-stat.out .match-stat-value');
-                const maybeStat = card.querySelector('.match-stat .match-stat-value');
                 
                 if (inStat) inStat.textContent = data.attendanceCount.players_in || 0;
                 if (outStat) outStat.textContent = data.attendanceCount.players_out || 0;
-                if (maybeStat) maybeStat.textContent = data.attendanceCount.players_maybe || 0;
+                
+                // Reload player names for this match
+                this.loadMatchPlayers(matchId);
             }
         });
     }

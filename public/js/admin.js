@@ -1,4 +1,4 @@
-// Football Team Manager - Admin Panel JavaScript
+// FootyCount - Admin Panel JavaScript
 class AdminApp {
     constructor() {
         this.currentUser = null;

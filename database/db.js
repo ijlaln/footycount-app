@@ -56,7 +56,7 @@ class Database {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 match_id INTEGER,
                 player_id INTEGER,
-                status TEXT CHECK(status IN ('in', 'out', 'maybe')) DEFAULT 'out',
+                status TEXT CHECK(status IN ('in', 'out')) DEFAULT 'out',
                 marked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (match_id) REFERENCES matches (id),
                 FOREIGN KEY (player_id) REFERENCES players (id),

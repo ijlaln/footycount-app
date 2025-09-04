@@ -486,14 +486,60 @@ body {
     color: white;
 }
 
-.attendance-btn.maybe {
-    border-color: var(--warning-color);
-    color: var(--warning-color);
+/* Player Names Display */
+.match-players {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
 }
 
-.attendance-btn.maybe.active {
-    background: var(--warning-color);
-    color: white;
+.players-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.players-in,
+.players-out {
+    padding: 10px;
+    border-radius: var(--radius-sm);
+    background: var(--light-color);
+}
+
+.players-in {
+    border-left: 3px solid var(--success-color);
+}
+
+.players-out {
+    border-left: 3px solid var(--danger-color);
+}
+
+.players-in h4,
+.players-out h4 {
+    margin: 0 0 8px 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.players-in h4 {
+    color: var(--success-color);
+}
+
+.players-out h4 {
+    color: var(--danger-color);
+}
+
+.player-names {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+    .players-section {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
 }
 
 /* Notifications */
