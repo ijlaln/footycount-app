@@ -391,8 +391,7 @@ class FootballApp {
     }
 
     showProfile() {
-        // TODO: Implement profile modal/page
-        this.showNotification('Profile', 'Profile page coming soon!', 'info');
+        window.location.href = '/profile';
     }
 
     getPositionName(position) {

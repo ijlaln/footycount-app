@@ -250,4 +250,57 @@ router.post('/logout', (req, res) => {
     res.json({ success: true, message: 'Logged out successfully' });
 });
 
+// Change password
+router.post('/change-password', async (req, res) => {
+    try {
+        const token = req.cookies.token;
+        
+        if (!token) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ error: 'Current password and new password are required' });
+        }
+
+        if (newPassword.length < 4) {
+            return res.status(400).json({ error: 'New password must be at least 4 characters long' });
+        }
+
+        // Get current user
+        const user = await db.get('SELECT * FROM players WHERE id = ?', [decoded.id]);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Verify current password
+        const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+        if (!isValidPassword) {
+            return res.status(400).json({ error: 'Current password is incorrect' });
+        }
+
+        // Hash new password
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update password
+        await db.run(`
+            UPDATE players 
+            SET password = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `, [hashedNewPassword, decoded.id]);
+
+        res.json({
+            success: true,
+            message: 'Password changed successfully'
+        });
+
+    } catch (error) {
+        console.error('Password change error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 module.exports = router;

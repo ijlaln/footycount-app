@@ -144,4 +144,131 @@ router.put('/:id', verifyToken, async (req, res) => {
     }
 });
 
+// Get current player's statistics
+router.get('/stats', verifyToken, async (req, res) => {
+    try {
+        const playerId = req.user.id;
+
+        // Get match statistics
+        const matchStats = await db.get(`
+            SELECT 
+                COUNT(DISTINCT m.id) as totalMatches,
+                COUNT(CASE WHEN ma.status = 'in' THEN 1 END) as attendedMatches,
+                CASE 
+                    WHEN COUNT(DISTINCT m.id) > 0 
+                    THEN ROUND((COUNT(CASE WHEN ma.status = 'in' THEN 1 END) * 100.0 / COUNT(DISTINCT m.id)), 1)
+                    ELSE 0 
+                END as attendanceRate
+            FROM matches m
+            LEFT JOIN match_attendance ma ON m.id = ma.match_id AND ma.player_id = ?
+            WHERE m.match_date <= datetime('now')
+        `, [playerId]);
+
+        // Get goal statistics
+        const goalStats = await db.get(`
+            SELECT COALESCE(SUM(goals), 0) as totalGoals
+            FROM player_stats 
+            WHERE player_id = ?
+        `, [playerId]);
+
+        const stats = {
+            totalMatches: matchStats.totalMatches || 0,
+            attendedMatches: matchStats.attendedMatches || 0,
+            attendanceRate: matchStats.attendanceRate || 0,
+            totalGoals: goalStats.totalGoals || 0
+        };
+
+        res.json(stats);
+    } catch (error) {
+        console.error('Error fetching player stats:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Get current player's recent activity
+router.get('/activity', verifyToken, async (req, res) => {
+    try {
+        const playerId = req.user.id;
+
+        // Get recent attendance records
+        const attendanceActivity = await db.all(`
+            SELECT 
+                'attendance' as type,
+                'Marked ' || ma.status || ' for ' || m.title as description,
+                ma.marked_at as created_at
+            FROM match_attendance ma
+            JOIN matches m ON ma.match_id = m.id
+            WHERE ma.player_id = ?
+            ORDER BY ma.marked_at DESC
+            LIMIT 10
+        `, [playerId]);
+
+        // Get recent goal records
+        const goalActivity = await db.all(`
+            SELECT 
+                'goal' as type,
+                'Scored ' || ps.goals || ' goal(s) in ' || m.title as description,
+                ps.created_at
+            FROM player_stats ps
+            JOIN matches m ON ps.match_id = m.id
+            WHERE ps.player_id = ? AND ps.goals > 0
+            ORDER BY ps.created_at DESC
+            LIMIT 5
+        `, [playerId]);
+
+        // Combine and sort activities
+        const allActivities = [...attendanceActivity, ...goalActivity]
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .slice(0, 15);
+
+        res.json(allActivities);
+    } catch (error) {
+        console.error('Error fetching player activity:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Update current player's profile
+router.put('/profile', verifyToken, async (req, res) => {
+    try {
+        const playerId = req.user.id;
+        const { name, position, jersey_number } = req.body;
+
+        if (!name) {
+            return res.status(400).json({ error: 'Name is required' });
+        }
+
+        // Check if jersey number is taken by another player
+        if (jersey_number) {
+            const existingJersey = await db.get(
+                'SELECT * FROM players WHERE jersey_number = ? AND id != ?',
+                [jersey_number, playerId]
+            );
+            
+            if (existingJersey) {
+                return res.status(400).json({ error: 'Jersey number already taken' });
+            }
+        }
+
+        // Update player profile
+        await db.run(`
+            UPDATE players 
+            SET name = ?, position = ?, jersey_number = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `, [name, position, jersey_number || null, playerId]);
+
+        const updatedPlayer = await db.get('SELECT * FROM players WHERE id = ?', [playerId]);
+        
+        res.json({
+            success: true,
+            message: 'Profile updated successfully',
+            player: updatedPlayer
+        });
+
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 module.exports = router;
