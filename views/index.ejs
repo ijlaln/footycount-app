@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ Football Team Manager</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#667eea">
+    <link rel="manifest" href="/manifest.json">
+</head>
+<body>
+    <div id="app">
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="loading-screen">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <h2>⚽ Football Manager</h2>
+                <p>Loading your team...</p>
+            </div>
+        </div>
+
+        <!-- Welcome/Login Screen -->
+        <div id="welcome-screen" class="welcome-screen" style="display: none;">
+            <div class="welcome-content">
+                <div class="welcome-header">
+                    <h1>⚽ Welcome to Football Manager</h1>
+                    <p>Join your team and manage match attendance</p>
+                </div>
+
+                <div class="auth-forms">
+                    <!-- Registration Form -->
+                    <div id="register-form" class="auth-form active">
+                        <h2>Create Your Profile</h2>
+                        <form id="register-form-element">
+                            <div class="form-group">
+                                <label for="reg-username">Username *</label>
+                                <input type="text" id="reg-username" name="username" required placeholder="Choose a unique username">
+                            </div>
+                            <div class="form-group">
+                                <label for="reg-password">Password *</label>
+                                <input type="password" id="reg-password" name="password" required placeholder="At least 4 characters">
+                            </div>
+                            <div class="form-group">
+                                <label for="reg-name">Display Name *</label>
+                                <input type="text" id="reg-name" name="name" required placeholder="Your name as it appears to others">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="reg-position">Position</label>
+                                    <select id="reg-position" name="position">
+                                        <option value="GK">Goalkeeper</option>
+                                        <option value="DEF">Defender</option>
+                                        <option value="MID" selected>Midfielder</option>
+                                        <option value="FWD">Forward</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="reg-jersey">Jersey # (optional)</label>
+                                    <input type="number" id="reg-jersey" name="jersey_number" min="1" max="99" placeholder="1-99">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-full">Join Team</button>
+                        </form>
+                        <p class="auth-switch">
+                            Already have an account? <a href="#" onclick="showLoginForm()">Sign In</a>
+                        </p>
+                    </div>
+
+                    <!-- Login Form -->
+                    <div id="login-form" class="auth-form">
+                        <h2>Sign In</h2>
+                        <form id="login-form-element">
+                            <div class="form-group">
+                                <label for="login-username">Username</label>
+                                <input type="text" id="login-username" name="username" required placeholder="Your username">
+                            </div>
+                            <div class="form-group">
+                                <label for="login-password">Password</label>
+                                <input type="password" id="login-password" name="password" required placeholder="Your password">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+                        </form>
+                        <p class="auth-switch">
+                            New to the team? <a href="#" onclick="showRegisterForm()">Create Account</a>
+                        </p>
+                        <p class="auth-switch">
+                            Need admin access? <a href="#" onclick="showAdminForm()">Create Admin Account</a>
+                        </p>
+                    </div>
+
+                    <!-- Admin Registration Form -->
+                    <div id="admin-form" class="auth-form">
+                        <h2>Create Admin Account</h2>
+                        <p class="admin-note">⚠️ Only create if no admin exists yet</p>
+                        <form id="admin-form-element">
+                            <div class="form-group">
+                                <label for="admin-username">Admin Username *</label>
+                                <input type="text" id="admin-username" name="username" required placeholder="Choose admin username">
+                            </div>
+                            <div class="form-group">
+                                <label for="admin-password">Admin Password *</label>
+                                <input type="password" id="admin-password" name="password" required placeholder="At least 4 characters">
+                            </div>
+                            <div class="form-group">
+                                <label for="admin-name">Admin Name *</label>
+                                <input type="text" id="admin-name" name="name" required placeholder="Your admin name">
+                            </div>
+                            <button type="submit" class="btn btn-secondary btn-full">Create Admin Account</button>
+                        </form>
+                        <p class="auth-switch">
+                            <a href="#" onclick="showLoginForm()">Back to Sign In</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard (hidden initially) -->
+        <div id="dashboard" style="display: none;">
+            <!-- Navigation -->
+            <nav class="navbar">
+                <div class="nav-container">
+                    <div class="nav-brand">
+                        <h1>⚽ Football Manager</h1>
+                    </div>
+                    <div class="nav-menu">
+                        <button id="profile-btn" class="nav-btn">
+                            <span class="nav-btn-text">Profile</span>
+                        </button>
+                        <button id="admin-btn" class="nav-btn" style="display: none;">
+                            <span class="nav-btn-text">Admin</span>
+                        </button>
+                        <button id="logout-btn" class="nav-btn logout">
+                            <span class="nav-btn-text">Logout</span>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- User Info -->
+                <div class="user-card">
+                    <div class="user-info">
+                        <h2 id="user-name">Loading...</h2>
+                        <div class="user-details">
+                            <span id="user-position">Position</span>
+                            <span id="user-jersey" style="display: none;">Jersey #</span>
+                        </div>
+                    </div>
+                    <div class="user-stats">
+                        <div class="stat">
+                            <div class="stat-value" id="user-matches">0</div>
+                            <div class="stat-label">Matches</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="user-goals">0</div>
+                            <div class="stat-label">Goals</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Matches -->
+                <section class="matches-section">
+                    <h2>Upcoming Matches</h2>
+                    <div id="upcoming-matches" class="matches-container">
+                        <!-- Matches will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Recent Matches -->
+                <section class="matches-section">
+                    <h2>Recent Matches</h2>
+                    <div id="recent-matches" class="matches-container">
+                        <!-- Recent matches will be loaded here -->
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- Notifications -->
+        <div id="notifications-container"></div>
+    </div>
+
+    <!-- Socket.IO -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>

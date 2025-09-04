@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ Admin Panel - Football Manager</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="admin-app">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <h1>⚽ Admin Panel</h1>
+                </div>
+                <div class="nav-menu">
+                    <button onclick="window.location.href='/'" class="nav-btn">
+                        <span class="nav-btn-text">Back to Dashboard</span>
+                    </button>
+                    <button id="logout-btn" class="nav-btn logout">
+                        <span class="nav-btn-text">Logout</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Admin Dashboard -->
+        <main class="admin-content">
+            <!-- Statistics Cards -->
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="total-players">0</div>
+                        <div class="stat-label">Total Players</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="upcoming-matches">0</div>
+                        <div class="stat-label">Upcoming Matches</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="avg-attendance">0%</div>
+                        <div class="stat-label">Avg Attendance</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚽</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="month-matches">0</div>
+                        <div class="stat-label">This Month</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="admin-actions">
+                <button id="create-match-btn" class="btn btn-primary">
+                    📅 Schedule New Match
+                </button>
+                <button id="view-players-btn" class="btn btn-secondary">
+                    👥 Manage Players
+                </button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="matches">Matches</button>
+                <button class="tab-btn" data-tab="players">Players</button>
+                <button class="tab-btn" data-tab="activity">Recent Activity</button>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="tab-content">
+                <!-- Matches Tab -->
+                <div id="matches-tab" class="tab-pane active">
+                    <div class="section-header">
+                        <h2>All Matches</h2>
+                        <button id="add-match-btn" class="btn btn-primary btn-sm">+ Add Match</button>
+                    </div>
+                    <div id="matches-list" class="admin-list">
+                        <!-- Matches will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Players Tab -->
+                <div id="players-tab" class="tab-pane">
+                    <div class="section-header">
+                        <h2>Team Members</h2>
+                        <div class="search-box">
+                            <input type="text" id="players-search" placeholder="Search players...">
+                        </div>
+                    </div>
+                    <div id="players-list" class="admin-list">
+                        <!-- Players will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Activity Tab -->
+                <div id="activity-tab" class="tab-pane">
+                    <div class="section-header">
+                        <h2>Recent Activity</h2>
+                    </div>
+                    <div id="activity-list" class="activity-list">
+                        <!-- Recent activity will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Create/Edit Match Modal -->
+        <div id="match-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="match-modal-title">Schedule New Match</h2>
+                    <span class="close">&times;</span>
+                </div>
+                <form id="match-form">
+                    <input type="hidden" id="match-id">
+                    <div class="form-group">
+                        <label for="match-title">Match Title *</label>
+                        <input type="text" id="match-title" name="title" required placeholder="e.g., Weekly Training, League Match">
+                    </div>
+                    <div class="form-group">
+                        <label for="match-description">Description</label>
+                        <textarea id="match-description" name="description" rows="3" placeholder="Additional details about the match..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="match-date">Date *</label>
+                            <input type="date" id="match-date" name="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="match-time">Time *</label>
+                            <input type="time" id="match-time" name="time" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="match-location">Location</label>
+                        <input type="text" id="match-location" name="location" placeholder="Stadium, Field, etc.">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeMatchModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Schedule Match</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Notifications -->
+        <div id="notifications-container"></div>
+    </div>
+
+    <!-- Socket.IO -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/admin.js"></script>
+</body>
+</html>

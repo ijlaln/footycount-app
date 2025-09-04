@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ Profile - Football Manager</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/profile.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="profile-app">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <h1>⚽ My Profile</h1>
+                </div>
+                <div class="nav-menu">
+                    <button onclick="window.location.href='/'" class="nav-btn">
+                        <span class="nav-btn-text">Back to Dashboard</span>
+                    </button>
+                    <button id="admin-btn" class="nav-btn" style="display: none;">
+                        <span class="nav-btn-text">Admin</span>
+                    </button>
+                    <button id="logout-btn" class="nav-btn logout">
+                        <span class="nav-btn-text">Logout</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Profile Content -->
+        <main class="profile-content">
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <div class="avatar-circle">
+                        <span id="profile-initials">--</span>
+                    </div>
+                </div>
+                <div class="profile-info">
+                    <h1 id="profile-name">Loading...</h1>
+                    <p id="profile-position">Position</p>
+                    <div class="profile-badges">
+                        <span id="jersey-badge" class="badge" style="display: none;">
+                            <span class="badge-icon">👕</span>
+                            <span id="jersey-number">--</span>
+                        </span>
+                        <span id="admin-badge" class="badge admin-badge" style="display: none;">
+                            <span class="badge-icon">👑</span>
+                            Admin
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Stats -->
+            <div class="profile-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="total-matches">0</div>
+                        <div class="stat-label">Total Matches</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="attended-matches">0</div>
+                        <div class="stat-label">Attended</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="attendance-rate">0%</div>
+                        <div class="stat-label">Attendance Rate</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚽</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="total-goals">0</div>
+                        <div class="stat-label">Goals</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Details Section -->
+            <div class="profile-section">
+                <div class="section-header">
+                    <h2>Profile Details</h2>
+                    <button id="edit-profile-btn" class="btn btn-secondary btn-sm">
+                        ✏️ Edit Profile
+                    </button>
+                </div>
+                
+                <!-- View Mode -->
+                <div id="profile-view" class="profile-details">
+                    <div class="detail-row">
+                        <div class="detail-label">Username</div>
+                        <div class="detail-value" id="view-username">--</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Display Name</div>
+                        <div class="detail-value" id="view-name">--</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Position</div>
+                        <div class="detail-value" id="view-position">--</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Jersey Number</div>
+                        <div class="detail-value" id="view-jersey">--</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Member Since</div>
+                        <div class="detail-value" id="view-joined">--</div>
+                    </div>
+                </div>
+
+                <!-- Edit Mode -->
+                <div id="profile-edit" class="profile-edit" style="display: none;">
+                    <form id="profile-form">
+                        <div class="form-group">
+                            <label for="edit-name">Display Name *</label>
+                            <input type="text" id="edit-name" name="name" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-position">Position</label>
+                                <select id="edit-position" name="position">
+                                    <option value="GK">Goalkeeper</option>
+                                    <option value="DEF">Defender</option>
+                                    <option value="MID">Midfielder</option>
+                                    <option value="FWD">Forward</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-jersey">Jersey Number</label>
+                                <input type="number" id="edit-jersey" name="jersey_number" min="1" max="99">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" id="cancel-edit-btn" class="btn btn-secondary">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Recent Activity Section -->
+            <div class="profile-section">
+                <div class="section-header">
+                    <h2>Recent Activity</h2>
+                </div>
+                <div id="recent-activity" class="activity-list">
+                    <!-- Recent activity will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Password Change Section -->
+            <div class="profile-section">
+                <div class="section-header">
+                    <h2>Security</h2>
+                </div>
+                <div class="security-section">
+                    <button id="change-password-btn" class="btn btn-warning">
+                        🔒 Change Password
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Change Password Modal -->
+        <div id="password-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Change Password</h2>
+                    <span class="close">&times;</span>
+                </div>
+                <form id="password-form">
+                    <div class="form-group">
+                        <label for="current-password">Current Password *</label>
+                        <input type="password" id="current-password" name="currentPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password">New Password *</label>
+                        <input type="password" id="new-password" name="newPassword" required minlength="4">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm New Password *</label>
+                        <input type="password" id="confirm-password" name="confirmPassword" required minlength="4">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closePasswordModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Notifications -->
+        <div id="notifications-container"></div>
+    </div>
+
+    <!-- Socket.IO -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/profile.js"></script>
+</body>
+</html>
